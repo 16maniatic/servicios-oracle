@@ -50,7 +50,7 @@ def start_services():
         "OracleOraDB21Home2TNSListener"
     ]
     for service in services:
-        controller("inicio", service)
+        controller("start", service) 
     
     action = key("Presiona ESPACIO para volver al menú principal...", 
                           "Presiona ENTER para salir...")
@@ -58,12 +58,14 @@ def start_services():
 
 def restart_services():
     print("\n=== Reiniciando servicios de Oracle ===")
-    stop_services()
-    
     services = [
         "OracleServiceXE",
         "OracleOraDB21Home2TNSListener"
     ]
+    
+    for service in services:
+        controller("stop", service)
+    
     for service in services:
         controller("start", service)
     
