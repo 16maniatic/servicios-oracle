@@ -2,12 +2,12 @@ import os
 import subprocess
 import msvcrt
 
-def limpiar_pantalla():
+def clear():
     os.system('cls')
 
-def esperar_tecla(mensaje_espacio, mensaje_enter):
-    print(f"\n{mensaje_espacio}")
-    print(f"{mensaje_enter}")
+def key(space, enter):
+    print(f"\n{space}")
+    print(f"{enter}")
     
     while True:
         if msvcrt.kbhit():
@@ -17,92 +17,92 @@ def esperar_tecla(mensaje_espacio, mensaje_enter):
             elif tecla == b'\r':
                 return "salir"
 
-def controlar_servicio(accion, servicio):
+def controller(action, service):
     try:
-        comando = f"net {accion} {servicio}"
-        resultado = subprocess.run(comando, shell=True, capture_output=True, text=True)
+        command = f"net {action} {service}"
+        result = subprocess.run(command, shell=True, capture_output=True, text=True)
 
-        if resultado.returncode == 0:
-            print(f"[✔] {accion.capitalize()} del servicio '{servicio}' completado.")
+        if result.returncode == 0:
+            print(f"{action.capitalize()} del servicio '{service}' completado.")
         else:
-            print(f"[✘] Error al {accion} el servicio '{servicio}':\n{resultado.stderr}")
+            print(f"\033[31mError al {action} el servicio '{service}':\n{result.stderr}\033[0m")
 
     except Exception as e:
-        print(f"[!] Ocurrió un error: {e}")
+        print(f"\033[31mOcurrió un error: {e}\033[0m")
 
-def detener_servicios_oracle():
+def stop_services():
     print("\n=== Deteniendo servicios de Oracle ===")
-    servicios = [
+    services = [
         "OracleServiceXE",
         "OracleOraDB21Home2TNSListener"
     ]
-    for servicio in servicios:
-        controlar_servicio("stop", servicio)
+    for service in services:
+        controller("stop", service)
     
-    accion = esperar_tecla("Presiona ESPACIO para volver al menú principal...", 
+    action = key("Presiona ESPACIO para volver al menú principal...", 
                           "Presiona ENTER para salir...")
-    return accion
+    return action
 
-def iniciar_servicios_oracle():
+def start_services():
     print("\n=== Iniciando servicios de Oracle ===")
-    servicios = [
+    services = [
         "OracleServiceXE",
         "OracleOraDB21Home2TNSListener"
     ]
-    for servicio in servicios:
-        controlar_servicio("start", servicio)
+    for service in services:
+        controller("inicio", service)
     
-    accion = esperar_tecla("Presiona ESPACIO para volver al menú principal...", 
+    action = key("Presiona ESPACIO para volver al menú principal...", 
                           "Presiona ENTER para salir...")
-    return accion
+    return action
 
-def reiniciar_servicios_oracle():
+def restart_services():
     print("\n=== Reiniciando servicios de Oracle ===")
-    detener_servicios_oracle()
+    stop_services()
     
-    servicios = [
+    services = [
         "OracleServiceXE",
         "OracleOraDB21Home2TNSListener"
     ]
-    for servicio in servicios:
-        controlar_servicio("start", servicio)
+    for service in services:
+        controller("start", service)
     
-    accion = esperar_tecla("Presiona ESPACIO para volver al menú principal...", 
+    action = key("Presiona ESPACIO para volver al menú principal...", 
                           "Presiona ENTER para salir...")
-    return accion
+    return action
 
-def borrar_servicios_oracle():
+def delete_services():
     print("\n=== ADVERTENCIA: Borrado de servicios de Oracle ===")
-    confirmacion = input("¿Estás seguro de que deseas continuar? (s/n): ")
-    if confirmacion.lower() == 's':
-        servicios = [
+    confirm = input("¿Estás seguro de que deseas continuar? (s/n): ")
+    if confirm.lower() == 's':
+        services = [
             "OracleServiceORCL",
             "OracleOraDB11g_home1TNSListener",
             "OracleJobSchedulerORCL"
         ]
-        for servicio in servicios:
-            controlar_servicio("stop", servicio)
+        for service in services:
+            controller("stop", service)
             try:
-                comando = f"sc delete {servicio}"
-                resultado = subprocess.run(comando, shell=True, capture_output=True, text=True)
-                if resultado.returncode == 0:
-                    print(f"[✔] Servicio '{servicio}' eliminado correctamente.")
+                command = f"sc delete {service}"
+                result = subprocess.run(command, shell=True, capture_output=True, text=True)
+                if result.returncode == 0:
+                    print(f"Servicio '{service}' eliminado correctamente.")
                 else:
-                    print(f"[✘] Error al eliminar el servicio '{servicio}':\n{resultado.stderr}")
+                    print(f"\033[31mError al eliminar el servicio '{service}':\n{result.stderr}\033[0m")
             except Exception as e:
-                print(f"[!] Ocurrió un error: {e}")
+                print(f"\033[31mOcurrió un error: {e}\033[0m")
                 
-        print("Se recomienda reiniciar el sistema para completar la desinstalación.")
+        print("\033[31mSe recomienda reiniciar el sistema para completar la desinstalación.\033[0m")
     else:
-        print("Operación cancelada.")
+        print("\033[31mOperación cancelada.\033[0m")
     
-    accion = esperar_tecla("Presiona ESPACIO para volver al menú principal...", 
+    action = key("Presiona ESPACIO para volver al menú principal...", 
                           "Presiona ENTER para salir...")
-    return accion
+    return action
 
-def mostrar_menu():
+def menu():
     while True:
-        limpiar_pantalla()
+        clear()
         print("GESTIÓN DE SERVICIOS ORACLE")
         print("*" * 27)
         print("1. Reiniciar servicios de Oracle")
@@ -112,25 +112,25 @@ def mostrar_menu():
         print("\033[31m(SOLO SI LO HAS DESINSTALADO Y/O QUIERES CAMBIAR LA VERSION INSTALADA)\033[0m")
         print("5. Salir")
         
-        opcion = input("Selecciona una opción (1-5): ")
+        option = input("Selecciona una opción (1-5): ")
         
-        if opcion == "1":
-            accion = reiniciar_servicios_oracle()
-            if accion == "salir":
+        if option == "1":
+            action = restart_services()
+            if action == "salir":
                 break
-        elif opcion == "2":
-            accion = detener_servicios_oracle()
-            if accion == "salir":
+        elif option == "2":
+            action = stop_services()
+            if action == "salir":
                 break
-        elif opcion == "3":
-            accion = iniciar_servicios_oracle()
-            if accion == "salir":
+        elif option == "3":
+            action = start_services()
+            if action == "salir":
                 break
-        elif opcion == "4":
-            accion = borrar_servicios_oracle()
-            if accion == "salir":
+        elif option == "4":
+            action = delete_services()
+            if action == "salir":
                 break
-        elif opcion == "5":
+        elif option == "5":
             print("\nSaliendo del programa...")
             break
         else:
@@ -138,5 +138,5 @@ def mostrar_menu():
             input("Presiona Enter para continuar...")
 
 if __name__ == "__main__":
-    mostrar_menu()
+    menu()
     
